@@ -1,6 +1,8 @@
+# Test uning paramiko
+# Slow output
 import paramiko
 
-hostname = '172.16.103.103'
+hostname = 'xxx.xxx.xxx.xxx'
 port = 22
 
 # trans = paramiko.Transport((hostname, port))
@@ -15,7 +17,7 @@ ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect(hostname, username='', password='')
 
 #stdin,stdout,stderr =ssh.exec_command('touch apagar')
-stdin,stdout,stderr = ssh.exec_command('cat apagar')
+stdin,stdout,stderr = ssh.exec_command('cat file')
 
 stdin.close()
 print((stdout.read()).decode())
